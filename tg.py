@@ -103,24 +103,31 @@ def star(nSwitches):
     ofile.write("\n")
     #linking 4 or less switchs to the switch #1
     s=2
-    for i in range(s,nSwitches):
+    for i in range(s,nSwitches+1):
         if s>5:
-			break
+            break
         ofile.write("       self.add_edge( s1"+",s"+str(s)+")\n")
+        s+=1
     
     #linking remaining switches to the "leaves"
     ofile.write("\n")
-    leaves={}
-    nLeaves=nSwitches-1
+    leaves=[]
+    nLeaves=4 if (nSwitches > 5) else nSwitches-1    
     
+    #special cases
     if nSwitches==1:
-		leaves.append(1)
-		nLeaves=1
+        leaves.append(1)
+        nLeaves=1
+    elif nSwitches==2:
+        leaves.append(1)
+        leaves.append(2)
+        nLeaves=2    
     
-    l=2    
-    for i in range(nLeaves):
-        leaves.append(l)
-        l+=1
+    else:
+        l=2    
+        for i in range(nLeaves):
+            leaves.append(l)
+            l+=1
     
     s=0
     for i in range(nLeaves+1,nSwitches):
@@ -129,8 +136,17 @@ def star(nSwitches):
         s+=1
         if s==4:
             s=0    			                		    
-
-                                                            					         	    
+    
+    ofile.write("\n")
+    s=0
+    for i in range(nSwitches*2):
+        ofile.write("       self.add_edge(s"+str(leaves[s])+",h"+str(i+1)+" )\n")
+        s+=1
+        if s==nLeaves:
+            s=0
+                        
+    ofile.write("\n")
+                                                                					         	    
 ofile.write("from mininet.topo import Topo, Node\n")
 ofile.write("class MyTopo( Topo ):\n")
 ofile.write("   def __init__( self, enable_all = True ):\n")
@@ -139,8 +155,8 @@ ofile.write("       super( MyTopo, self ).__init__()\n")
 #-------------------------------------------------------------------------------
 
 nSwitches=int(raw_input("Enter the number of switches of your topology:"))
-fullMesh(nSwitches)
-
+#fullMesh(nSwitches)
+star(nSwitches)
 
 ofile.write("       self.enable_all()\n")
 ofile.write("topos = { 'mytopo': ( lambda: MyTopo() ) }\n")
